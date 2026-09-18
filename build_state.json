@@ -1,0 +1,14 @@
+{
+  "manifest_server_block": true,
+  "planning": true,
+  "infra": true,
+  "tool_groups": { "evaluations": true, "models": true },
+  "built_from": {
+    "evaluations": ["evaluate_state.md"],
+    "models": ["list_models.md"]
+  },
+  "validation_rounds": 1,
+  "validation_passed": true,
+  "docs_status_written": true,
+  "readme": true
+}
