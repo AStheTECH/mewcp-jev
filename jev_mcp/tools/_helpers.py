@@ -32,7 +32,7 @@ def _handle_request_exc(result_class, tlog, exc):
             error=ToolError(code="UPSTREAM_ERROR", message=str(exc)))
     # Must precede ValueError — ValidationError subclasses it.
     if isinstance(exc, pydantic.ValidationError):
-        tlog.failure("UPSTREAM_ERROR", str(exc))  # detail stays in the log
+        tlog.failure("UPSTREAM_ERROR", "Response validation failed")  # str(exc) embeds response field values — never log it
         return result_class(success=False, statusCode=502, retriable=False,
             error=ToolError(code="UPSTREAM_ERROR",
                             message="Upstream response did not match the expected schema"))
