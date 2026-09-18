@@ -1,0 +1,82 @@
+{
+  "manifest_version": 1,
+  "server": {
+    "name": "mewcp-jev",
+    "package": "jev_mcp",
+    "auth": "static",
+    "version": "v1.0.0",
+    "api_base": "https://api.typesafe.ai/v1"
+  },
+  "tools": {
+    "groups": {
+      "evaluations": {
+        "file": "evaluations_tools.py",
+        "doc_source": "evaluate_state.md",
+        "register_fn": "register_evaluations_tools",
+        "tools": {
+          "evaluate_state": {
+            "endpoint": "POST /systemone",
+            "description": "Evaluate a state against a map of typed questions and get back structured answers, one per question.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "state",
+                "type": "string | object | array",
+                "required": true,
+                "description": "The content to evaluate: a plain string for text, or structured data (object/array) for chat logs, records, or app state."
+              },
+              {
+                "name": "model",
+                "type": "string",
+                "required": true,
+                "description": "The model that handles the request, e.g. \"jev-latest\" (alias) or a pinned version like \"jev-1.13.0\". See the models group."
+              },
+              {
+                "name": "questions",
+                "type": "map<string, Question>",
+                "required": true,
+                "description": "A map of typed Question objects, keyed by a caller-chosen id (answers come back under the same keys; the key itself is never sent to the model). Each Question is a discriminated union on its 'type' field, one of 'noul', 'choice', or 'score'. All three share 'type' (required) and 'instructions' (required, string | object | array | null - arbitrary JSON accepted for clarity or to pass supporting data verbatim). Noul (type: 'noul'): a yes/no question; optional 'criteria' object with optional 'true'/'false' string (or object/array) descriptions of what a yes/no answer means. Choice (type: 'choice'): picks one option from a set; required 'criteria': map<string, string | object | array | null>, one entry per option, each value an optional rubric description (null when the option needs no extra detail). Score (type: 'score'): rates the state on a rubric; required 'criteria': an ordered array of at least two level descriptions (each a string, or an object/array for structured rubric detail). Any of the three types can be mixed in the same questions map in a single call; every question is evaluated in parallel and independently against the same state."
+              }
+            ],
+            "response_fields": [
+              { "name": "model", "type": "string" },
+              { "name": "answers", "type": "map<string, Answer>" },
+              { "name": "answers[].type", "type": "string" },
+              { "name": "answers[].noul", "type": "number" },
+              { "name": "answers[].choice", "type": "string" },
+              { "name": "answers[].probabilities", "type": "map<string, number>" },
+              { "name": "answers[].confidence", "type": "number" },
+              { "name": "answers[].score", "type": "number" },
+              { "name": "answers[].legend", "type": "map<string, string>" },
+              { "name": "usage.input_tokens", "type": "integer" },
+              { "name": "usage.output_tokens", "type": "integer" }
+            ],
+            "schema": { "data": "EvaluateStateData", "result": "EvaluateStateResult" }
+          }
+        }
+      },
+      "models": {
+        "file": "models_tools.py",
+        "doc_source": "list_models.md",
+        "register_fn": "register_models_tools",
+        "tools": {
+          "list_models": {
+            "endpoint": "GET /models",
+            "description": "List the model names and aliases an account can send in the evaluate-state `model` field, with a description and release date for each.",
+            "tier": "GET",
+            "params": [],
+            "response_fields": [
+              { "name": "models", "type": "array" },
+              { "name": "models[].name", "type": "string" },
+              { "name": "models[].description", "type": "string" },
+              { "name": "models[].release_date", "type": "string" }
+            ],
+            "schema": { "data": "ModelListData", "result": "ModelListResult" }
+          }
+        }
+      }
+    }
+  },
+  "resources": {},
+  "prompts": {}
+}
